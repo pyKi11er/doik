@@ -4,22 +4,27 @@ from dataclasses import dataclass
 @dataclass
 class Quest:
     def __init__(self):
+        self.__quest_id = None
         self.__title = ""
         self.__type = None
-        self.__reward_xp = calculateRewardXP()
-        self.__completion_time = calculateCompletionTime()
-        self.__stamina_cost = calculateStaminaCost()
-        self.__focus_cost = calculateFocusCost()
-        self.__category = getCategory()
-        self.__reward_tier = calculateRewardTier()
-        self.__emotional_weight = calculateEmotionalWeight()
+        self.__stamina_cost = 0
+        self.__focus_cost = 0
+        self.__category = None
         self.__parent_quest = None
-        self.__decay_rate = calculateDecayRate()
         self.__state = 0
         self.__time_of_creation = datetime.now()
         self.__time_completion = None
         self.__recurring = False
 
+        # calculated fields depend on cost/category set above
+        self.__reward_xp = self.calculateRewardXP()
+        self.__completion_time = self.calculateCompletionTime()
+        self.__decay_rate = self.calculateDecayRate()
+        self.__reward_tier = self.calculateRewardTier()
+        self.__emotional_weight = self.calculateEmotionalWeight()
+
+    def getQuestId(self):
+        return self.__quest_id
 
     def getTitle(self):
         return self.__title
@@ -65,6 +70,9 @@ class Quest:
 
     def isRecurring(self):
         return self.__recurring
+
+    def setQuestId(self, quest_id: int):
+        self.__quest_id = quest_id
 
     def setTitle(self, title: str):
         self.__title = title
@@ -115,6 +123,10 @@ class Quest:
     def calculateCompletionTime(self):
         ...
 
+
+    # Stamina cost and focus cost can either be manually set by user
+    # or be AI approximated that's why we keep possibilites of setting those
+    # with methods 
     def calculateStaminaCost(self):
         ...
 

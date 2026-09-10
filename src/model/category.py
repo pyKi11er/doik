@@ -1,13 +1,10 @@
-from dataclasses import dataclass
-
-@dataclass
 class Category:
     def __init__(self):
         self.__category_name = ""
         self.__category_description = ""
         self.__xp_contribution = 0
         self.__color = None
-        self.__parent_category = None
+        self.__parent_category = None #One of the core 5 categories
         self.__category_id = None
 
     def getCategoryName(self):
@@ -36,6 +33,12 @@ class Category:
 
     def setCategoryId(self, category_id: int):
         self.__category_id = category_id
+
+    def setCategoryColor(self, color):
+        self.__color = color
+
+    def setParentCategory(self, parent_category):
+        self.__parent_category = parent_category
 
     #Will determine the xp_contribution later on by receiving it from logs
     def incrementXpContribution(self, xp_contribution: int):
