@@ -1,14 +1,12 @@
-# Renamed from SkillTree to SkillForest to resolve the name collision with the
-# per-category tree class in parent_tree.py (that one is now the "SkillTree").
-# Worth deciding if this needs to stay a real class at all - it currently holds
-# no state beyond a plain list of trees, so it could just as easily be an
-# implicit query/collection at the app level rather than a persisted entity.
-class SkillForest:
-    def __init__(self):
-        self.__tree_arr = []
+# Holds the top-level collection of per-category SkillTrees. Still worth deciding
+# whether this needs to be a real persisted class, it currently carries no state
+# beyond a plain list, so it could just as easily be an implicit query at the
+# app/service level rather than an entity of its own.
+from dataclasses import dataclass, field
 
-    def getTreeArr(self):
-        return self.__tree_arr.copy()
+@dataclass
+class SkillForest:
+    tree_arr: list = field(default_factory=list)
 
     def addTree(self, tree):
-        self.__tree_arr.append(tree)
+        self.tree_arr.append(tree)

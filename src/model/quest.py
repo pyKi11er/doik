@@ -1,121 +1,60 @@
-from sys import datetime
-from dataclasses import dataclass
+from __future__ import annotations
+from dataclasses import dataclass, field
+from datetime import datetime
+from model import Category
 
 @dataclass
 class Quest:
-    def __init__(self):
-        self.__quest_id = None
-        self.__title = ""
-        self.__type = None
-        self.__stamina_cost = 0
-        self.__focus_cost = 0
-        self.__category = None
-        self.__parent_quest = None
-        self.__state = 0
-        self.__time_of_creation = datetime.now()
-        self.__time_completion = None
-        self.__recurring = False
+    quest_id: int | None = None
+    title: str = ""
+    quest_type: int | None = None  # Main / Side / Daily. Origin (manual / brain-dump /
+                                    # tavern) is NOT stored here - derivable by reverse
+                                    # lookup from whichever log created this quest.
+    stamina_cost: float = 0
+    focus_cost: float = 0
+    category: Category | None = None
+    parent_quest: Quest | None = None
+    state: int = 0
+    time_of_creation: datetime = field(default_factory=datetime.now)
+    time_of_completion: datetime | None = None
+    recurring: bool = False
 
-        # calculated fields depend on cost/category set above
-        self.__reward_xp = self.calculateRewardXP()
-        self.__completion_time = self.calculateCompletionTime()
-        self.__decay_rate = self.calculateDecayRate()
-        self.__reward_tier = self.calculateRewardTier()
-        self.__emotional_weight = self.calculateEmotionalWeight()
+    _reward_xp: int = field(init=False, repr=False)
+    _completion_time: float = field(init=False, repr=False)
+    _decay_rate: float = field(init=False, repr=False)
+    _reward_tier: str = field(init=False, repr=False)
+    _emotional_weight: float = field(init=False, repr=False)
 
-    def getQuestId(self):
-        return self.__quest_id
+    # Difficulty is intentionally NOT a stored field as the design it's
+    # computed at display time as f(stamina_cost, focus_cost, character.stamina,
+    # character.focus), not a fixed intrinsic value.
 
-    def getTitle(self):
-        return self.__title
+    def __post_init__(self):
+        self._reward_xp = self.calculateRewardXP()
+        self._completion_time = self.calculateCompletionTime()
+        self._decay_rate = self.calculateDecayRate()
+        self._reward_tier = self.calculateRewardTier()
+        self._emotional_weight = self.calculateEmotionalWeight()
 
-    def getType(self):
-        return self.__type
+    @property
+    def reward_xp(self) -> int:
+        return self._reward_xp
 
-    def getRewardXP(self):
-        return self.__reward_xp
+    @property
+    def completion_time(self) -> float:
+        return self._completion_time
 
-    def getCompletionTime(self):
-        return self.__completion_time
+    @property
+    def decay_rate(self) -> float:
+        return self._decay_rate
 
-    def getStaminaCost(self):
-        return self.__stamina_cost
+    @property
+    def reward_tier(self) -> str:
+        return self._reward_tier
 
-    def getFocusCost(self):
-        return self.__focus_cost
-
-    def getCategory(self):
-        return self.__category
-
-    def getRewardTier(self):
-        return self.__reward_tier
-
-    def getEmotionalWeight(self):
-        return self.__emotional_weight
-
-    def getParentQuest(self):
-        return self.__parent_quest
-
-    def getDecayRate(self):
-        return self.__decay_rate
-
-    def getState(self):
-        return self.__state
-
-    def getTimeOfCreation(self):
-        return self.__time_of_creation
-
-    def getTimeCompletion(self):
-        return self.__time_completion
-
-    def isRecurring(self):
-        return self.__recurring
-
-    def setQuestId(self, quest_id: int):
-        self.__quest_id = quest_id
-
-    def setTitle(self, title: str):
-        self.__title = title
-
-    def setType(self, type):
-        self.__type = type
-
-    def setRewardXP(self, reward_xp: int):
-        self.__reward_xp = reward_xp
-
-    def setCompletionTime(self, completion_time):
-        self.__completion_time = completion_time
-
-    def setStaminaCost(self, stamina_cost: int):
-        self.__stamina_cost = stamina_cost
-
-    def setFocusCost(self, focus_cost: int):
-        self.__focus_cost = focus_cost
-
-    def setCategory(self, category):
-        self.__category = category
-
-    def setRewardTier(self, reward_tier):
-        self.__reward_tier = reward_tier
-
-    def setEmotionalWeight(self, emotional_weight):
-        self.__emotional_weight = emotional_weight
-
-    def setParentQuest(self, parent_quest):
-        self.__parent_quest = parent_quest
-
-    def setDecayRate(self, decay_rate):
-        self.__decay_rate = decay_rate
-
-    def setState(self, state: int):
-        self.__state = state
-
-    def setTimeOfCompletion(self, time_of_completion):
-        self.__time_completion = time_of_completion
-
-    def setRecurring(self, recurring: bool):
-        self.__recurring = recurring
-
+    @property
+    def emotional_weight(self) -> float:
+        return self._emotional_weight
 
     def calculateRewardXP(self):
         ...
@@ -123,10 +62,9 @@ class Quest:
     def calculateCompletionTime(self):
         ...
 
-
-    # Stamina cost and focus cost can either be manually set by user
-    # or be AI approximated that's why we keep possibilites of setting those
-    # with methods 
+    # Stamina cost and focus cost can either be manually set by the user or be
+    # AI-approximated - kept as callable stubs rather than invoked automatically,
+    # since the source of the value depends on origin.
     def calculateStaminaCost(self):
         ...
 
@@ -141,10 +79,3 @@ class Quest:
 
     def calculateDecayRate(self):
         ...
-
-    
-
-
-    
-
-    
