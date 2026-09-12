@@ -8,7 +8,7 @@ class Category:
     cat_desc: str = ""
     xp_contribution: float = 0
     color: str | None = None
-    parent_cat: Category | None = None  # None => this IS one of the 5 core categories
+    parent_cat: Category | None = None  # None => this is one of the 5 core categories
 
     # Will determine the xp_contribution later on by receiving it from logs
     def incrementXpContribution(self, xp_contribution: int):
