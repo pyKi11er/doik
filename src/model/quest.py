@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
-from model import Category, Character, QuestMissingCategoryError, QuestCategoryZeroXP
+from model import Category, Character, SkillTree, QuestMissingSkillTreeError, QuestInvalidSkillTreeLevelError
 from typing import ClassVar
 
 
@@ -27,22 +27,23 @@ class Quest:
     time_of_completion: datetime | None = None
     recurring: bool = False
 
-    _reward_xp: int = field(init=False, repr=False)
+    _base_xp_reward: float = field(init=False, repr=False)
+    _reward_xp: float = field(init=False, repr=False)
     _completion_time: float = field(init=False, repr=False)
     _decay_rate: float = field(init=False, repr=False)
-    _reward_tier: str = field(init=False, repr=False)
+    # _reward_tier: str = field(init=False, repr=False)
     _emotional_weight: float = field(init=False, repr=False)
 
 
     INTRINSIC_TIER_COSTS: ClassVar[dict] = {
-        1: {"stamina": 5, "focus": 5},
-        2: {"stamina": 10, "focus": 10},
-        3: {"stamina": 17, "focus": 17},
-        4: {"stamina": 25, "focus": 25},
-        5: {"stamina": 36, "focus": 36}
+        1: {"stamina": 5, "focus": 5, "base_xp_reward": 15},
+        2: {"stamina": 10, "focus": 10, "base_xp_reward": 32.5},
+        3: {"stamina": 17, "focus": 17, "base_xp_reward": 52.5},
+        4: {"stamina": 25, "focus": 25, "base_xp_reward": 75},
+        5: {"stamina": 36, "focus": 36, "base_xp_reward": 100}
     } # lookup table of tiers for our SLM
 
-    MAX_XP_CATEGORY: ClassVar[int] = 100 #maximum xp a character can have in any skill tree
+    MAX_XP_CATEGORY: ClassVar[int] = 100 # just a constant to ground the difficulty
     STAMINA_WEIGHT: ClassVar[int] = 5 # stamina factor
     FOCUS_WEIGHT: ClassVar[int] = 7 # focus factor which is greater as logically focus is more important
 
@@ -56,15 +57,22 @@ class Quest:
         if self.tier is not None:
             self.stamina_cost = self.calculateStaminaCost()
             self.focus_cost = self.calculateFocusCost()
-        self._reward_xp = self.calculateRewardXP()
+        self._reward_xp = self.calculateRewardXP() # with our multiplier
+        self._base_reward_xp = self.calculateBaseRewardXP() #getting it from lookup table
         self._completion_time = self.calculateCompletionTime()
         self._decay_rate = self.calculateDecayRate()
-        self._reward_tier = self.calculateRewardTier()
+
+        # self._reward_tier = self.calculateRewardTier()
+        
         self._emotional_weight = self.calculateEmotionalWeight()
 
 
     @property
-    def reward_xp(self) -> int:
+    def base_reward_xp(self) -> float:
+        return self._base_reward_xp
+
+    @property
+    def reward_xp(self) -> float:
         return self._reward_xp
 
     @property
@@ -90,35 +98,39 @@ class Quest:
     def calculateFocusCost(self) -> int:
         return self.INTRINSICE_TIER_COST[self.tier]["focus"]
 
-    def calculateDifficulty(self, character: Character) -> float:
-        if self.category is  None:
-            raise QuestMissingCategoryError(f"Quest {self.title!r} has no category set.")
+    def calculateBaseRewardXP(self) -> float:
+        return self.INTRINSIC_TIER_COSTS[self.tier]["base_xp_reward"]
 
-        if self.category.xp_contribution <= 0:
-            raise QuestCategoryZeroXP(
-                f"Category {self.category.cat_name!r} has 0 XP contribution."
+    def calculateDifficulty(self, character: Character, skill_tree: SkillTree) -> float:
+        if skill_tree is None:
+            raise QuestMissingSkillTreeError(
+                f"Quest {self.title!r} was not given a SkillTree to calculate difficulty against."
+            )
+
+
+        if skill_tree.tree_lvl <= 0:
+            raise QuestInvalidSkillTreeLevelError(
+                f"SkillTree {skill_tree.tree_name!r} has a non-positive tree_lvl "
+                f"({skill_tree.tree_lvl}); difficulty is undefined."
             )
         stamina_term = 5 * (self.stamina_cost / (character.stamina+1))
         focus_term = 7 * (self.focus_cost / (character.focus+1))
-        return (self.MAX_XP_CATEGORY / self.category.xp_contribution) + stamina_term + focus_term
+        return (self.MAX_XP_CATEGORY / skill_tree.tree_lvl) + stamina_term + focus_term
             
 
         
 
     def calculateRewardXP(self):
-        ...
+        multiplier = 1 + (self.calculateDifficulty() / 100)
+        return self.base_reward_xp * multiplier
 
     def calculateCompletionTime(self):
         ...
-
-    # Stamina cost and focus cost can either be manually set by the user or be
-    # AI-approximated - kept as callable stubs rather than invoked automatically,
-    # since the source of the value depends on origin.
     
         ...
 
-    def calculateRewardTier(self):
-        ...
+    # def calculateRewardTier(self):
+    #     ...
 
     def calculateEmotionalWeight(self):
         ...
