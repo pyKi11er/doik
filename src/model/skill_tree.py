@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import ClassVar
 from model import Category
-from math import exp
+from math import exp, sin, pi
 
 @dataclass
 class SkillTree:
@@ -10,6 +10,8 @@ class SkillTree:
     XP_CURVE_RATE: ClassVar[float] = 0.25
     BASE_LVL: ClassVar[int] = 1
     MAX_LVL: ClassVar[int] = 20
+    FRICTION_AMPLITUDE: ClassVar[float] = -0.4
+    FRICTION_WIDTH: ClassVar[int] = 7
     
     tree_id: int | None = None
     ref_to_cat: Category | None = None
@@ -29,12 +31,20 @@ class SkillTree:
     def xp_for_next(self):
         return self.calculateXPForNextLevel()
 
+    # Friction for implementation of a real learning curve where around levels 5-8 
+    # the gaining xp becomes significantly harder then gradually after reaching level 15 
+    # our regular exponential grind begins
+    def calculateFrictionCoef(self, lvl: int) -> float:
+        if lvl >= 15:
+            return 1
+        return 1 + (self.FRICTION_AMPLITUDE * sin((pi * lvl) / self.FRICTION_WIDTH))
 
     #Calculates threshold xp for any level
     def calculateXPForLevel(self, lvl: int) -> float:
         if lvl <= self.BASE_LVL:
             return 0
-        return self.XP_CURVE_BASE * exp(self.XP_CURVE_RATE * (lvl - 1))
+        friction = self.calculateFrictionCoef(lvl)
+        return (self.XP_CURVE_BASE * exp(self.XP_CURVE_RATE * (lvl - 1))) * friction
 
 
     #Calculates the amount of overall xp a
@@ -42,12 +52,12 @@ class SkillTree:
     def calculateXPForNextLevel(self, lvl: int | None = None) -> float:
         if lvl is None:
             lvl = self.tree_lvl
-        return self.calculateTreeLevel(lvl+1)
+        return self.calculateXPForLevel(lvl+1)
 
     # Needed to reset displayed xp after leveling up
     @property
     def xp_into_current_level(self) -> float:
-        return self.total_xp - self.calculateXPForNextLevel(self.tree_lvl)
+        return self.total_xp - self.calculateXPForLevel(self.tree_lvl)
 
     # Needed to reset goal xp for a new level
     @property
@@ -68,7 +78,6 @@ class SkillTree:
         return new_level
 
             
-
     def addXP(self, reward_xp: float):
         self.total_xp += reward_xp
         self.tree_lvl = self.calculateTreeLevel()
