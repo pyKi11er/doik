@@ -37,14 +37,14 @@ class SkillTree:
     def calculateFrictionCoef(self, lvl: int) -> float:
         if lvl >= 15:
             return 1
-        return 1 + (self.FRICTION_AMPLITUDE * sin((pi * lvl) / self.FRICTION_WIDTH))
+        return 1 + (self.FRICTION_AMPLITUDE * sin((pi * lvl) / self.FRICTION_WIDTH)) #1 - 0.4 * sin(lvl * pi/7)
 
     #Calculates threshold xp for any level
     def calculateXPForLevel(self, lvl: int) -> float:
         if lvl <= self.BASE_LVL:
             return 0
         friction = self.calculateFrictionCoef(lvl)
-        return (self.XP_CURVE_BASE * exp(self.XP_CURVE_RATE * (lvl - 1))) * friction
+        return (self.XP_CURVE_BASE * exp(self.XP_CURVE_RATE * (lvl - 1))) * friction # 100 * e^(0.25*lvl) * friction
 
 
     #Calculates the amount of overall xp a
