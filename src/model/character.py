@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
-
+from model.skill_forest import SkillForest
+from model.exceptions import CharacterError, CharacterSkillForestAlreadyExists
 # The character class will hold the character's stats, inventory, and status effects.
 @dataclass
 class Character:
@@ -10,8 +11,6 @@ class Character:
 
     character_id: int | None = None
     name: str = ""
-    level: int = 0  # was missing entirely - restored, since calculateLevel()
-                     # needs somewhere to store its result
     streak: int = 0
     inventory: int = 0
     status_effects: list = field(default_factory=list)
@@ -20,6 +19,7 @@ class Character:
 
     _stamina: float = 100
     _focus: float = 100
+    _ref_skill_forest: SkillForest | None = None
 
     @property
     def stamina(self) -> float:
@@ -37,7 +37,17 @@ class Character:
     def focus(self, val: float):
         self._focus = max(0, min(val, self.MAX_FOCUS))
 
+    @property
+    def ref_skill_forest(self) -> SkillForest:
+        return self._ref_skill_forest
 
-    # Will calculate the level based on skill tree progressions
-    def calculateLevel(self, *args):
-        ...
+
+    # Write-once: raises if a forest is already assigned, rather than silently
+    # replacing it.
+    @ref_skill_forest.setter
+    def ref_skill_forest(self, skill_forest: SkillForest):
+        if self._ref_skill_forest is not None:
+            raise CharacterSkillForestAlreadyExists(
+                f"Character {self.name!r} already has a SkillForest assigned."
+            )
+        self._ref_skill_forest = skill_forest

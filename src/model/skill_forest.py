@@ -6,7 +6,13 @@ from dataclasses import dataclass, field
 
 @dataclass
 class SkillForest:
-    tree_arr: list = field(default_factory=list)
+    skill_forest_id: int | None = None
+    _tree_arr: list = field(default_factory=list)
+
+    @property
+    def tree_arr(self) -> list:
+        return self.tree_arr.copy()
+
 
     def addTree(self, tree):
         self.tree_arr.append(tree)

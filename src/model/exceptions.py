@@ -22,3 +22,17 @@ class QuestMissingSkillTreeError(QuestError):
 class QuestInvalidSkillTreeLevelError(QuestError):
     """Raised when the provided SkillTree has a non-positive tree_lvl, which
     would make difficulty (100 / tree_lvl) undefined."""
+
+
+#Character-related exceptions
+
+class CharacterError(DoIkError):
+    """Base class for any error raised while working with a Character."""
+
+class CharacterSkillForestAlreadyExists(CharacterError):
+    """Raised when trying to force a reference change for skill forest in character"""
+
+
+class CharacterMissingSkillForestError(CharacterError):
+    """Raised when a calculation needs a Character's SkillForest, but none has
+    been assigned yet - expected for a freshly-created Character."""
