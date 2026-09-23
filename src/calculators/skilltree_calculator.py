@@ -1,4 +1,4 @@
-from model import SkillTree
+from src.model.skill_tree import SkillTree
 from math import exp, sin, pi
 
 class SkillTreeCalculator:
@@ -11,7 +11,7 @@ class SkillTreeCalculator:
 
 
     @staticmethod
-    def is_maxed(skill_tree: SkillTree) -> bool:
+    def isMaxed(skill_tree: SkillTree) -> bool:
         return skill_tree.tree_lvl >= SkillTreeCalculator.MAX_LVL
 
     # Friction for implementation of a real learning curve where around levels 5-8 

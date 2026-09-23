@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from model import Category
+from src.model.category import Category
 
 @dataclass
 class SkillTree:    
