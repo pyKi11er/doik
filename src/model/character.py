@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
-from model.skill_forest import SkillForest
-from model.exceptions import CharacterError, CharacterSkillForestAlreadyExists
+from src.model.skill_forest import SkillForest
+from src.model.exceptions import CharacterError, CharacterSkillForestAlreadyExists
 # The character class will hold the character's stats, inventory, and status effects.
 @dataclass
 class Character:

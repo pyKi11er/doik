@@ -1,5 +1,5 @@
-from model import Character
-from model.exceptions import CharacterMissingSkillForestError
+from src.model.character import Character
+from src.model.exceptions import CharacterMissingSkillForestError
 class CharacterCalculator:
 
     @staticmethod

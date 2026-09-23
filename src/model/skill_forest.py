@@ -11,8 +11,8 @@ class SkillForest:
 
     @property
     def tree_arr(self) -> list:
-        return self.tree_arr.copy()
+        return self._tree_arr.copy()
 
 
     def addTree(self, tree):
-        self.tree_arr.append(tree)
+        self._tree_arr.append(tree)
