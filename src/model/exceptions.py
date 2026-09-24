@@ -17,12 +17,19 @@ class QuestMissingCategoryError(QuestError):
 class QuestMissingSkillTreeError(QuestError):
     """Raised when calculateDifficulty is called without the SkillTree that
     corresponds to the quest's category."""
+
+
+class QuestMissingCharacterError(QuestError):
+    """Raised when calculateDifficulty is called without the Character reference"""
  
  
 class QuestInvalidSkillTreeLevelError(QuestError):
     """Raised when the provided SkillTree has a non-positive tree_lvl, which
     would make difficulty (100 / tree_lvl) undefined."""
 
+
+class QuestIsNone(QuestError):
+    """Raised from calculator when passing a None quest for calculating difficulty or reward"""
 
 #Character-related exceptions
 

@@ -1,5 +1,7 @@
-from model import Quest, Character, SkillTree
-from model.exceptions import QuestError,  QuestMissingCategoryError, QuestMissingSkillTreeError, QuestInvalidSkillTreeLevelError
+from src.model.quest import Quest
+from src.model.character import Character
+from src.model.skill_tree import SkillTree
+from src.model.exceptions import QuestError,  QuestMissingCharacterError, QuestMissingSkillTreeError, QuestInvalidSkillTreeLevelError, QuestIsNone
 
 class QuestCalculator:
 
@@ -23,7 +25,7 @@ class QuestCalculator:
 
     @staticmethod
     def calculateFocusCost(quest: Quest) -> int:
-        return QuestCalculator.INTRINSICE_TIER_COST[quest.tier]["focus"]
+        return QuestCalculator.INTRINSIC_TIER_COSTS[quest.tier]["focus"]
 
 
     @staticmethod
@@ -35,19 +37,27 @@ class QuestCalculator:
     
     @staticmethod
     def calculateDifficulty(quest: Quest, character: Character, skill_tree: SkillTree) -> float:
+        if quest is None:
+            raise QuestIsNone(
+                f"Quest was not given to calculate difficulty of"
+        )
         if skill_tree is None:
             raise QuestMissingSkillTreeError(
                 f"Quest {quest.title!r} was not given a SkillTree to calculate difficulty against."
             )
 
+        if character is None:
+            raise QuestMissingCharacterError(
+                f"Quest {quest.title!r} was not given a Character to calculate difficulty for"
+            )
 
         if skill_tree.tree_lvl <= 0:
             raise QuestInvalidSkillTreeLevelError(
                 f"SkillTree {skill_tree.tree_name!r} has a non-positive tree_lvl "
                 f"({skill_tree.tree_lvl}); difficulty is undefined."
             )
-        stamina_term = 5 * (QuestCalculator.calculateStaminaCost(quest) / (character.stamina+1))
-        focus_term = 7 * (QuestCalculator.calculateFocusCost(quest) / (character.focus+1))
+        stamina_term = QuestCalculator.STAMINA_WEIGHT * (QuestCalculator.calculateStaminaCost(quest) / (character.stamina+1))
+        focus_term = QuestCalculator.FOCUS_WEIGHT * (QuestCalculator.calculateFocusCost(quest) / (character.focus+1))
         return (QuestCalculator.MAX_XP_CATEGORY / skill_tree.tree_lvl) + stamina_term + focus_term
             
 

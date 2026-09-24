@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
-from model import Category
+from src.model.category import Category
 
 
 @dataclass
@@ -24,18 +24,6 @@ class Quest:
     time_of_completion: datetime | None = None
     recurring: bool = False
     character_id: int | None = None # owner of the quest
-
-
-
-    # THESE SHOULD BE CHANGED FROM CACHED ATTRIBUTES TO READ ONLY FUNCTION CALLS 
-    # WHICH WILL BE IMPLEMENTED IN QuestCalculator
-
-    # _base_xp_reward: float = field(init=False, repr=False)
-    # _reward_xp: float = field(init=False, repr=False)
-    # _completion_time: float = field(init=False, repr=False)
-    # _decay_rate: float = field(init=False, repr=False)
-    # # _reward_tier: str = field(init=False, repr=False)
-    # _emotional_weight: float = field(init=False, repr=False)
 
 
     def __post_init__(self):
